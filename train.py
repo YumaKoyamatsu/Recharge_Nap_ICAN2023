@@ -11,18 +11,18 @@ import tqdm
 
 # Constants
 INPUT_DIM = 1 # 時系列データの次元数を設定してください
-OUTPUT_DIM = 5 # カテゴリデータの次元数を設定してください
-HIDDEN_DIM = 256  # Transformer内の隠れ層の次元数を設定してください
+OUTPUT_DIM = 4 # カテゴリデータの次元数を設定してください
+HIDDEN_DIM = 128  # Transformer内の隠れ層の次元数を設定してください
 NUM_LAYERS = 1
 # NHEAD = 8  # Transformerのマルチヘッド数を設定してください
 # NLAYERS = 6  # Transformerのエンコーダーとデコーダーのレイヤー数を設定してください
 # DROPOUT = 0.1# ドロップアウト率を設定してください
 
-DATA_DIR = 'dataset\\YSYW_seq'
+DATA_DIR = 'dataset\\YSYW_seq\\all'
 TRAIN_RATIO = 0.8
-NUM_EPOCHS = 100000
-BATCH_SIZE = 512
-lr = 0.001
+NUM_EPOCHS = 100
+BATCH_SIZE = 8
+lr = 0.0001
 
 #GPUデバイス
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")

@@ -20,16 +20,11 @@ class RRIDataset(Dataset):
         self.annot = torch.cat(self.annot, axis=0)
         print(self.sig.shape, self.annot.shape)
         
-        # #標準化
-        # tmp_sigs = []
-        # for i in range(self.sig.shape[0]):
-        #     tmp_data = self.sig[i, :, :].reshape(-1)
-        #     mean_tmp = torch.mean(tmp_data)
-        #     sd = torch.std(tmp_data, unbiased=False)
-        #     tmp_data = ((tmp_data - mean_tmp) / sd).reshape(1, 30, 1)
-        #     tmp_sigs.append(tmp_data)
-        # self.sig = torch.cat(tmp_sigs, axis=0)
-        # print(self.sig.shape, self.annot.shape)
+        #annotの4を３に書き換え
+        for i in range(len(self.annot)):
+            if self.annot[i] == 4:
+                self.annot[i] = 3
+        
         
     def __getitem__(self, index):
         sig = self.sig[index]
@@ -41,7 +36,7 @@ class RRIDataset(Dataset):
 
 if __name__ == '__main__':
     # npyファイルが保存されているディレクトリへのパス
-    DATA_DIR = 'dataset\\YSYW_seq'
+    DATA_DIR = 'dataset\\YSYW_seq\\all'
     TRAIN_RATIO = 0.7
     NUM_EPOCHS = 10
     BATCH_SIZE = 32
@@ -66,13 +61,7 @@ if __name__ == '__main__':
         # データローダーからバッチごとにデータを取得
         for batch_x, label in train_loader:
            # print(batch_x, label)
-            print(batch_x.shape)
-            a = batch_x[0].reshape(-1)
-            b = batch_x[1].reshape(-1)
+            print(label)
             
-            
-            plt.plot(a)
-            plt.plot(b)
-            plt.show()
             print("")
             

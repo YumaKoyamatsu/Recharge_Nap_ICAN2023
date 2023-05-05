@@ -5,12 +5,13 @@ import scipy
 from tqdm import tqdm
 import os
 
+#ANNOT_CONVERT_DICT = {"W": 0, "N1": 1, "N2": 2, "N3": 3, "R": 4} #数値ラベル定義
 ANNOT_CONVERT_DICT = {"W": 0, "N1": 1, "N2": 2, "N3": 3, "R": 4} #数値ラベル定義
 FREQ = 200
 NUM_INPUT = 30
 EXTRA_TIME = 3
 
-def load_data(path):
+def load_all_data(path):
     sig = wfdb.rdsamp(path) #signalデータ
     annot = wfdb.rdann(path, extension="arousal") #Annotationデータ
 
@@ -21,6 +22,7 @@ def load_data(path):
     annot_stage = [ANNOT_CONVERT_DICT[x] for x in annot_stage] #睡眠ステージアノテーションデータ
 
     return ecg_sig, annot_idx, annot_stage
+
 
 if __name__ == "__main__":
     
@@ -34,7 +36,7 @@ if __name__ == "__main__":
             continue
         
         #ECGデータ，アノテーションインデックスデータ，アノテーションデータの読み込み
-        ecg_sig, annot_idx, annot_stage = load_data(f"dataset\\YSYW\\{subject}\\{subject}")
+        ecg_sig, annot_idx, annot_stage = load_all_data(f"dataset\\YSYW\\{subject}\\{subject}")
 
         seq_sig_list = []
         stage_list = []
