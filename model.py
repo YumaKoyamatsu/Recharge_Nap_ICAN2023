@@ -76,36 +76,31 @@ class LSTM_Classifier(nn.Module):
         #out = self.softmax(out)
         return out
 
-class TimeSeriesTransformer(nn.Module):
-    def __init__(self, input_dim, output_dim, hidden_dim, nhead, nlayers, dropout):
-        super(TimeSeriesTransformer, self).__init__()
-
-        # 入力層
-        self.input_fc = nn.Linear(input_dim, hidden_dim)
-
-        # Transformer層
-        self.transformer = nn.Transformer(
-            d_model=hidden_dim,
-            nhead=nhead,
-            num_encoder_layers=nlayers,
-            num_decoder_layers=0,
-            dropout=dropout,
+class TimeSeriesClassifier(nn.Module):
+    def __init__(self, input_dim, num_classes, d_model=64, nhead=4, num_layers=2, dim_feedforward=128, dropout=0.1):
+        super(TimeSeriesClassifier, self).__init__()
+        self.embedding = nn.Linear(input_dim, d_model)
+        
+        encoder_layer = nn.TransformerEncoderLayer(
+            d_model,
+            nhead,
+            dim_feedforward,
+            dropout
         )
-
-        # 出力層
-        self.output_fc = nn.Linear(hidden_dim, output_dim)
+        self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers)
+        
+        self.classifier = nn.Linear(d_model, num_classes)
 
     def forward(self, x):
-        # 入力データの次元を調整
-        x = self.input_fc(x)
-        print(x.shape)
-        x = x.permute(1, 0, 2)  # Transformerは [sequence length, batch size, hidden_dim] を入力として期待しています
-
-        # Transformerを通してデータを渡す
-        x = self.transformer(x)
-
-        # 出力データの次元を調整
+        # x: (batch_size, seq_length, input_dim)
+        x = self.embedding(x)
+        # x: (batch_size, seq_length, d_model)
         x = x.permute(1, 0, 2)
-        x = self.output_fc(x)
-
+        # x: (seq_length, batch_size, d_model)
+        x = self.transformer_encoder(x)
+        # x: (seq_length, batch_size, d_model)
+        x = x.mean(dim=0)
+        # x: (batch_size, d_model)
+        x = self.classifier(x)
+        # x: (batch_size, num_classes)
         return x
