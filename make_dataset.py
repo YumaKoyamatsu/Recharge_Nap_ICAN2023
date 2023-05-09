@@ -98,8 +98,13 @@ def make_ECGWave_dataset(mode, subject, ecg_sig, annot_idx, annot_stage):
         seq_sig_list.append(ecg_elem)
         stage_list.append(stage)
         
-        print("")
+    seq_sig_list = np.array(seq_sig_list)
+    stage_list = np.array(stage_list)
         
+    dataset = {"sig":seq_sig_list, "annot":stage_list}
+    
+    #保存
+    np.save(f"dataset\\YSYW_seq\\{mode}\\processed_{subject}.npy", dataset)
 
 if __name__ == "__main__":
     
