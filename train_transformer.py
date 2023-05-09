@@ -11,20 +11,20 @@ import tqdm
 
 # Constants
 INPUT_DIM = 1 # 時系列データの次元数を設定してください
-OUTPUT_DIM = 5 # カテゴリデータの次元数を設定してください
-D_MODEL = 64
-NUM_CLASSES = 5
-HIDDEN_DIM = 256  # Transformer内の隠れ層の次元数を設定してください
+OUTPUT_DIM = 4 # カテゴリデータの次元数を設定してください
+D_MODEL = 32
+NUM_CLASSES = 4
+HIDDEN_DIM = 64  # Transformer内の隠れ層の次元数を設定してください
 NUM_LAYERS = 1
 # NHEAD = 8  # Transformerのマルチヘッド数を設定してください
 # NLAYERS = 6  # Transformerのエンコーダーとデコーダーのレイヤー数を設定してください
 # DROPOUT = 0.1# ドロップアウト率を設定してください
 
-DATA_DIR = 'dataset\\YSYW_seq'
+DATA_DIR = 'dataset\\YSYW_seq\\all'
 TRAIN_RATIO = 0.8
 NUM_EPOCHS = 1000000
-BATCH_SIZE = 16
-lr = 0.001
+BATCH_SIZE = 32
+lr = 0.0001
 
 #GPUデバイス
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -53,13 +53,11 @@ model = TimeSeriesClassifier(input_dim=INPUT_DIM, num_classes=NUM_CLASSES, d_mod
 #model = MLP(INPUT_DIM, HIDDEN_DIM, OUTPUT_DIM).to(device)
 print(model)
 
-
-
 # for parameter in iter(model.parameters()):
 #     print(parameter)
     
 # オプティマイザと損失関数を設定
-optimizer = optim.Adam(model.parameters(), lr=lr)
+optimizer = optim.Adam(model.parameters(), lr=lr, amsgrad=True)
 criterion = nn.CrossEntropyLoss()
 
 train_loss_per_epoch_list = []
@@ -124,7 +122,7 @@ for epoch in range(NUM_EPOCHS):
             outputs = model(seq_rris)
             #予測ラベル
             predicted = torch.max(outputs, 1)[1]
-            #print(predicted)
+            print(predicted)
             # loss calc.
             loss = criterion(outputs, labels)
             #学習回数更新

@@ -11,7 +11,7 @@ class RRIDataset(Dataset):
         
         for file in files:
             data = np.load(file, allow_pickle=True).item()
-            sig = torch.tensor(data['sig'], dtype=torch.float32)
+            sig = torch.tensor(data['sig'], dtype=torch.float)
             annot = torch.tensor(data['annot'], dtype=torch.long)
             self.sig.append(sig)
             self.annot.append(annot)
@@ -20,10 +20,10 @@ class RRIDataset(Dataset):
         self.annot = torch.cat(self.annot, axis=0)
         print(self.sig.shape, self.annot.shape)
         
-        #annotの4を３に書き換え
-        for i in range(len(self.annot)):
-            if self.annot[i] == 4:
-                self.annot[i] = 3
+        # #annotの4を３に書き換え
+        # for i in range(len(self.annot)):
+        #     if self.annot[i] == 4:
+        #         self.annot[i] = 3
         
         
     def __getitem__(self, index):
