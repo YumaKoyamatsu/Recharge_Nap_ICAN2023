@@ -95,6 +95,13 @@ def make_ECGWave_dataset(mode, subject, ecg_sig, annot_idx, annot_stage):
         std = np.std(ecg_elem, axis=0)    # 標準偏差を計算
         ecg_elem = (ecg_elem - mean) / std
         
+        #欠損判定
+        isnan_result = np.isnan(ecg_elem)
+        contains_nan = np.any(isnan_result)
+        if contains_nan:
+            print("nan detected")
+            continue
+        
         seq_sig_list.append(ecg_elem)
         stage_list.append(stage)
         
