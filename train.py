@@ -18,10 +18,10 @@ NUM_LAYERS = 1
 # NLAYERS = 6  # Transformerのエンコーダーとデコーダーのレイヤー数を設定してください
 # DROPOUT = 0.1# ドロップアウト率を設定してください
 
-DATA_DIR = 'dataset\\YSYW_seq\\all'
+DATA_DIR = 'dataset\\YSYW_seq\\ecg'
 TRAIN_RATIO = 0.8
 NUM_EPOCHS = 100
-BATCH_SIZE = 8
+BATCH_SIZE = 32
 lr = 0.0001
 
 #GPUデバイス
