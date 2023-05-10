@@ -8,21 +8,22 @@ from torch.utils.data import Dataset, DataLoader, random_split
 from torchvision import datasets, transforms
 import os
 import tqdm
+import matplotlib.pyplot as plt
 
 # Constants
 INPUT_DIM = 1 # 時系列データの次元数を設定してください
-OUTPUT_DIM = 4 # カテゴリデータの次元数を設定してください
-HIDDEN_DIM = 128  # Transformer内の隠れ層の次元数を設定してください
-NUM_LAYERS = 1
+OUTPUT_DIM = 5 # カテゴリデータの次元数を設定してください
+HIDDEN_DIM = 64  # Transformer内の隠れ層の次元数を設定してください
+NUM_LAYERS = 10
 # NHEAD = 8  # Transformerのマルチヘッド数を設定してください
 # NLAYERS = 6  # Transformerのエンコーダーとデコーダーのレイヤー数を設定してください
 # DROPOUT = 0.1# ドロップアウト率を設定してください
 
 DATA_DIR = 'dataset\\YSYW_seq\\ecg'
 TRAIN_RATIO = 0.8
-NUM_EPOCHS = 100
+NUM_EPOCHS = 1024
 BATCH_SIZE = 32
-lr = 0.0001
+lr = 0.01
 
 #GPUデバイス
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -44,53 +45,18 @@ val_dataset = RRIDataset(val_files)
 
 # DataLoaderを使用してミニバッチ学習を実現
 train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
-val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=True)
-
-# # 変換方法の指定
-# transform = transforms.Compose([
-#     transforms.ToTensor()
-#     ])
-
-# # MNISTデータの取得
-# # https://pytorch.org/vision/stable/generated/torchvision.datasets.MNIST.html#torchvision.datasets.MNIST
-# # 学習用
-# train_dataset = datasets.MNIST(
-#     'dataset\\MNIST',               # データの保存先
-#     train = True,           # 学習用データを取得する
-#     download = True,        # データが無い時にダウンロードする
-#     transform = transform   # テンソルへの変換など
-#     )
-# # 評価用
-# val_dataset = datasets.MNIST(
-#     'dataset\\MNIST', 
-#     train = False,
-#     transform = transform
-#     )
-
-# # データローダー
-# train_loader = torch.utils.data.DataLoader(
-#     train_dataset,
-#     batch_size = BATCH_SIZE,
-#     shuffle = True)
-
-# val_loader = torch.utils.data.DataLoader(
-#     val_dataset,     
-#     batch_size = BATCH_SIZE,
-#     shuffle = True)
-
+val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
 # モデルのインスタンスを作成
 model = LSTM_Classifier(INPUT_DIM, HIDDEN_DIM, OUTPUT_DIM, NUM_LAYERS).to(device)
 #model = MLP(INPUT_DIM, HIDDEN_DIM, OUTPUT_DIM).to(device)
 print(model)
 
-
-
 # for parameter in iter(model.parameters()):
 #     print(parameter)
     
 # オプティマイザと損失関数を設定
-optimizer = optim.Adam(model.parameters(), lr=lr)
+optimizer = optim.Adam(model.parameters(), lr=lr, amsgrad=True)
 criterion = nn.CrossEntropyLoss()
 
 train_loss_per_epoch_list = []
@@ -110,11 +76,6 @@ for epoch in range(NUM_EPOCHS):
     for seq_rris, labels in train_loader:
         #入力をGPUに転送
         seq_rris, labels = seq_rris.to(device), labels.to(device)
-        #print(seq_rris[0].reshape(-1))
-        #print(seq_rris[1].reshape(-1))
-        #print(labels.data)
-        #seq_rris = seq_rris.view(-1, INPUT_DIM) # 画像データ部分を一次元へ並び変える
-        #print(seq_rris.shape, labels.shape)
         # 勾配をクリア
         optimizer.zero_grad()
         # 推論
@@ -132,11 +93,11 @@ for epoch in range(NUM_EPOCHS):
         #学習回数更新
         num_train+=len(labels)
         #lossの保存
-        train_loss_list.append(loss.item())
+        train_loss_list.append(loss.item()*seq_rris.shape[0])
         #精度の保存
         train_acc += (predicted == labels.data).sum()
 
-    train_loss = np.sum(train_loss_list) / num_train
+    train_loss = sum(train_loss_list) / num_train
     train_loss_per_epoch_list.append(train_loss)
     train_acc = train_acc / num_train
     train_acc_per_epoch_list.append(train_acc)
@@ -161,14 +122,18 @@ for epoch in range(NUM_EPOCHS):
             #学習回数更新
             num_val+=len(labels)
             # lossの保存
-            val_loss_list.append(loss.item())
+            val_loss_list.append(loss.item() * seq_rris.shape[0])
             #精度の保存
-            val_acc += (predicted == labels).sum()
+            val_acc += (predicted == labels.data).sum()
         
-    val_loss = np.sum(val_loss_list) / num_val
+    val_loss = sum(val_loss_list) / num_val
     val_loss_per_epoch_list.append(val_loss)
     val_acc = val_acc / num_val
     val_acc_per_epoch_list.append(val_acc)
     #コンソール表示
     print(f"Epoch:{epoch}, Train loss:{train_loss}, Train acc:{train_acc}, Valid loss:{val_loss}, Valid acc:{val_acc}")
+
+plt.plot(train_loss_per_epoch_list)
+plt.plot(val_loss_per_epoch_list)
+plt.show()
             

@@ -1,4 +1,4 @@
 *.mat
 *.hea
 *.arousal
-dataset/YSYW/*
+*.tar.gz

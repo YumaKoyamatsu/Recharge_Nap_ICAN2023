@@ -57,23 +57,16 @@ class LSTM_Classifier(nn.Module):
         self.hidden_dim = hidden_dim
         self.num_layers = num_layers
 
-        self.lstm = nn.LSTM(input_dim, hidden_dim, num_layers, batch_first=True)
-        self.relu = nn.ReLU(inplace=True)
-        self.fc1 = nn.Linear(hidden_dim, 32)
-        self.fc2 = nn.Linear(32, output_dim)
-
-        #self.softmax = nn.Softmax(dim=1)
-
+        self.lstm = nn.LSTM(input_dim, hidden_dim, num_layers, batch_first=True, dropout=0.5)
+        self.linear = nn.Linear(self.hidden_dim, output_dim)
+        
     def forward(self, x):
-        h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_dim).to(x.device)
-        c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_dim).to(x.device)
+        self.h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_dim).to(x.device)
+        self.c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_dim).to(x.device)
 
-        lstm_out, (h0, c0) = self.lstm(x, (h0, c0))
+        lstm_out, (h0, c0) = self.lstm(x, (self.h0, self.c0))
         out = h0[-1, :, :]
-        out = self.fc1(out)
-        out = self.relu(out)
-        out = self.fc2(out)
-        #out = self.softmax(out)
+        out = self.linear(out)
         return out
 
 class TimeSeriesClassifier(nn.Module):

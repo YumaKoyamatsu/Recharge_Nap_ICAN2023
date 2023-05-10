@@ -5,6 +5,9 @@ import scipy
 from tqdm import tqdm
 import os
 import matplotlib.pyplot as plt
+import tarfile
+
+
 
 #ANNOT_CONVERT_DICT = {"W": 0, "N1": 1, "N2": 2, "N3": 3, "R": 4} #数値ラベル定義
 ANNOT_CONVERT_DICT = {"W": 0, "N1": 1, "N2": 2, "N3": 3, "R": 4} #数値ラベル定義
@@ -88,12 +91,19 @@ def make_ECGWave_dataset(mode, subject, ecg_sig, annot_idx, annot_stage):
     for idx, stage in tqdm(zip(annot_idx, annot_stage)):
         start_idx = idx - NUM_INPUT*FREQ
         end_idx = idx
-        ecg_elem = ecg_sig[start_idx:end_idx]
+        
+        (_, ecg_elem, _, _, _, _, _) = ecg.ecg(
+                                    signal=ecg_sig[start_idx:end_idx], 
+                                    sampling_rate=FREQ, 
+                                    show=False, 
+                                    interactive=False
+                                )
+        
         #print(ecg_elem.shape)
         
-        mean = np.mean(ecg_elem, axis=0)  # 平均値を計算
-        std = np.std(ecg_elem, axis=0)    # 標準偏差を計算
-        ecg_elem = (ecg_elem - mean) / std
+        #mean = np.mean(ecg_elem, axis=0)  # 平均値を計算
+        #std = np.std(ecg_elem, axis=0)    # 標準偏差を計算
+        #ecg_elem = (ecg_elem - mean) / std
         
         #欠損判定
         isnan_result = np.isnan(ecg_elem)
@@ -112,6 +122,7 @@ def make_ECGWave_dataset(mode, subject, ecg_sig, annot_idx, annot_stage):
     
     #保存
     np.save(f"dataset\\YSYW_seq\\{mode}\\processed_{subject}.npy", dataset)
+    
 
 if __name__ == "__main__":
     
@@ -136,4 +147,5 @@ if __name__ == "__main__":
         elif mode == "ECG":
             make_ECGWave_dataset(mode, subject, ecg_sig, annot_idx, annot_stage)
             
-        print("")
+    with tarfile.open(f'dataset\\{mode}.tar.gz', 'w:gz') as tar:
+        tar.add('dataset\\YSYW_seq\\ecg')
