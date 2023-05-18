@@ -38,11 +38,11 @@ class RRIDataset(Dataset):
         #データの正規化
         scaler = MinMaxScaler(feature_range=(0, 1))
         normalized_sig = scaler.fit_transform(self.sig.T).T
-        self.sig = torch.tensor(normalized_sig).float()
+        self.sig = torch.tensor(normalized_sig, dtype=torch.float32)
         
         #次元追加
-        self.sig = torch.unsqueeze(self.sig, -1)
-        self.annot = torch.tensor(self.annot).long()
+       # self.sig = torch.unsqueeze(self.sig, -1)
+        self.annot = torch.tensor(self.annot, dtype=torch.int64)
         print(self.sig.shape, self.annot.shape)        
         
     def __getitem__(self, index):
@@ -81,7 +81,7 @@ if __name__ == '__main__':
         for batch_x, label in train_loader:
            # print(batch_x, label)
             print(batch_x.shape, label.shape)
-            plt.plot(batch_x[0, :, 0])
+            plt.plot(batch_x[0, :])
             plt.show()
             
             print("")

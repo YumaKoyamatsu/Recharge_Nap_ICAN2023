@@ -2,3 +2,5 @@
 *.hea
 *.arousal
 *.tar.gz
+*.npy
+*.html
