@@ -24,7 +24,27 @@ class MLP(nn.Module):
     def forward(self, x):
         x = self.net(x)
         return x
-        
+
+class CNN(nn.Module):
+    def __init__(self, output_dim, hidden_dim):
+        super(CNN, self).__init__()
+        self.conv1 = nn.Conv2d(1, 32, kernel_size=3)
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=3)
+        self.pool = nn.MaxPool2d(2, 2)
+        self.fc1 = nn.Linear(64 * 254 * 1, hidden_dim)
+        self.fc2 = nn.Linear(hidden_dim, output_dim)
+        self.flatten = nn.Flatten()
+
+    def forward(self, x):
+        x = self.pool(F.relu(self.conv1(x)))
+        x = self.pool(F.relu(self.conv2(x)))
+        # print(x.shape)
+        x = self.flatten(x)
+        #x = x.view(-1, 64 * 7 * 7)
+        x = F.relu(self.fc1(x))
+        x = self.fc2(x)
+        return x
+
 class RNN_Classifier(nn.Module):
     
     def __init__(self, input_size, hidden_size, output_size, num_layers):
@@ -95,7 +115,7 @@ class TimeSeriesClassifier(nn.Module):
         x = self.classifier(x)
         # x: (batch_size, num_classes)
         return x
-    
+
 class LabelSmoothingLoss(nn.Module):
     def __init__(self, num_classes, smoothing=0.0):
         super(LabelSmoothingLoss, self).__init__()
