@@ -5,3 +5,4 @@
 *.npy
 *.html
 result/
+model.pth
